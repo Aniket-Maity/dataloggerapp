@@ -1,0 +1,165 @@
+<html>
+    <head>
+        <title>data logger</title>
+        <script>
+            async function getInput(){
+                var name = document.getElementById("nameInput");
+                var message = document.getElementById("messageInput");
+                var uniqueId = document.getElementById("uniqueId");
+                finalName = name.value;
+                finalMessage = message.value;
+                finalUniqueId = uniqueId.value;
+                const data  = {finalUniqueId,finalName,finalMessage};
+                console.log(data);
+                const options = {
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                };
+                const response = await fetch('/api',options);
+                const resData = await response.json();
+                console.log(resData);
+
+            }
+        </script>
+    </head>
+    <body>
+        Unique Id
+        <input type="text" id="uniqueId"><br>
+        <br> your unique Id
+        <input type="submit" value="click me" onclick="getUniqueId(); return false;"><br>
+        <script>
+                async function getUniqueId() {
+                    let r = Math.random().toString(36).substring(3);
+                    console.log("random", r);
+                    //var uniqueId = document.getElementById("uniqueIdGet");
+                    document.getElementById("uniqueIdGet").textContent = "your Unique Id: "+r;
+
+                    // uId.textContent = `your Unique Id: ${r}`;
+                    // document.body.append(uId);
+
+                    //document.body.replaceWith()
+                    
+                }
+            </script>
+        <p>please save/remember the unique id. Without this entries will be lost</p>
+        name
+        <input type = 'text' id="nameInput">
+        message
+        <input type = "text" id="messageInput">
+        <input type="submit" value="click me" onclick="getInput();window.location.reload();"><br>
+        <p>---------------------------------</p>
+        get your data
+        <input type="submit" value="click me"  onclick="checkClickCountFOrDataFetch();"><br>
+        <p>---------------------------------</p>
+        <p id="uniqueIdGet"></p>
+        <div id="root"></div>
+        
+        <script>
+            var click = 0;
+            function checkClickCountFOrDataFetch(){
+                if(click<1){
+                    click+=1;
+                    getDataFromServer();
+
+                }
+
+            }
+            async function getDataFromServer(){
+                var uniqueId = document.getElementById("uniqueId").value;
+                console.log('/api/'+uniqueId);
+                getData(uniqueId);
+            }
+
+            
+            async function getData(uniqueIdPar){
+                
+                const response = await fetch('/api/'+uniqueIdPar);
+                // const yourData = document.createElement('h2');
+                // yourData.textContent = `your entries`;
+                const data = await response.json();
+                // document.body.append(yourData);
+                const root = document.getElementById('root');
+                var mainString = '';
+                for(item of data){
+                    //const root = document.createElement('div');
+                    // const name = document.createElement('p');
+                    // const message = document.createElement('p');
+                    // const time = document.createElement('p');
+                    // //const uniqueId = document.createElement('div');
+                    // name.textContent = `name:${item.finalName}`;
+                    // message.textContent = `message:${item.finalMessage}`;
+                    // const dateString = new Date(item.timeStamp).toLocaleString();
+                    // time.textContent = dateString;
+                    //root.append(name,message,time);
+                    
+                    
+                    
+                    mainString +='name: '+item.finalName+'</br>message: '+item.finalMessage+'</br>'+new Date(item.timeStamp).toLocaleString()+'</br>';
+                    
+                    
+
+                    
+                    
+                }
+
+                root.innerHTML  = "<h3>Your entries</h3></br>"+mainString;
+                //console.log(mainString);
+                //document.getElementById("showData").textContent = mainString;
+                var button = document.createElement("button");
+                button.id = 'downloadButton';
+                button.onclick = async function downloadData(){
+                                    var uniqueId = document.getElementById("uniqueId").value;
+                                    //console.log('/api/'+uniqueId);
+                                    var uniqueId = document.getElementById("uniqueId").value;
+                                    //console.log('/api/'+uniqueId);
+                                    const response = await fetch('/api/'+uniqueId);
+                                    const data = await response.json();
+                                    var newData = '';
+                                    for (items of data){
+                                        //console.log(Date(items.timeStamp.toLocaleString()));
+                                        newData+=items.finalName +','+items.finalMessage +','+Date(items.timeStamp.toLocaleString())+'\n';
+                                    }
+                                    var filename = "download.txt";
+                                    download(filename, newData);
+                                    
+                                }
+                button.innerHTML = "download";
+                document.body.append(button);
+                
+                
+
+
+                console.log(data);
+            }
+        </script>
+        <script>
+            async function downloadData(){
+                var uniqueId = document.getElementById("uniqueId").value;
+                //console.log('/api/'+uniqueId);
+                var uniqueId = document.getElementById("uniqueId").value;
+                //console.log('/api/'+uniqueId);
+                const response = await fetch('/api/'+uniqueId);
+                const data = await response.json();
+                var filename = "download.txt";
+                download(filename, data);
+                
+            }
+            function download(filename, text) {
+                var element = document.createElement('a');
+                element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+                element.setAttribute('download', filename);
+
+                element.style.display = 'none';
+                document.body.appendChild(element);
+
+                element.click();
+
+                document.body.removeChild(element);
+            }
+        </script>
+
+    </body>
+</html>
